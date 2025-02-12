@@ -1,89 +1,122 @@
-# Install Docker
-sudo apt  install docker.io -y
+# Docker Installation
 
-#Create Nexus Repo using Docker image
+```sh
+sudo apt install docker.io -y
+```
+
+## Deploy Nexus Repository with Docker
+
+```sh
 sudo docker run -d -p 8081:8081 sonatype/nexus3
+```
 
-#Create Sonarqube Repo using Docker image
+## Deploy SonarQube with Docker
 
+```sh
 sudo docker run -d -p 9000:9000 sonatype/nexus3
+```
 
-# To get nexus password
+## Retrieve Nexus Admin Password
 
-sudo docker exec -it <nexus contailes ID> /bin/bash
+```sh
+sudo docker exec -it <nexus-container-ID> /bin/bash
+```
 
+---
 
-# install terraform
+# Terraform Installation
+
+```sh
 sudo snap install terraform --classic
+```
 
+# Kubectl Installation
 
-# install kubectl
+```sh
 sudo snap install kubectl --classic
+```
 
+## Connect to AWS EKS Cluster
 
-# connect cluster
+```sh
 aws eks --region ap-south-1 update-kubeconfig --name devopsshack-cluster
+```
 
+## Create a Kubernetes Secret for Private DockerHub Registry
 
-
-# Create secret for private dockerhub
-
+```sh
 kubectl create secret docker-registry regcred \
   --docker-server=https://index.docker.io/v1/ \
-  --docker-username=vamsi3203 \
-  --docker-password=Learning@3203 \
+  --docker-username=<your-docker-username> \
+  --docker-password=<your-docker-password> \
   --namespace=webapps
+```
 
-===============================================================
+---
 
-Promotheus
+# Prometheus Installation
 
+Download and extract Prometheus:
+
+```sh
 wget https://github.com/prometheus/prometheus/releases/download/v3.2.0-rc.1/prometheus-3.2.0-rc.1.linux-amd64.tar.gz
+```
 
+## Blackbox Exporter Installation
 
-blackbox exporter
-
+```sh
 wget https://github.com/prometheus/blackbox_exporter/releases/download/v0.25.0/blackbox_exporter-0.25.0.linux-amd64.tar.gz
+```
 
+---
 
-==================================================
+# Grafana Installation
 
-#Install Grafana
-
+```sh
 sudo apt-get install -y adduser libfontconfig1 musl
 wget https://dl.grafana.com/enterprise/release/grafana-enterprise_11.5.1_amd64.deb
 sudo dpkg -i grafana-enterprise_11.5.1_amd64.deb
+```
 
-# to Run Grafana
- sudo /bin/systemctl start grafana-server
+## Start Grafana Service
 
-# Run Prometheus
+```sh
+sudo /bin/systemctl start grafana-server
+```
+
+## Start Prometheus
+
+```sh
 cd prometheus
 ./prometheus &
+```
 
-# Run Prometheus
-cd prometheus
-./prometheus &
+---
 
+# Linking Blackbox Exporter with Prometheus
 
-=============================================
+Refer to the official Blackbox Exporter repository: [Blackbox Exporter](https://github.com/prometheus/blackbox_exporter)
 
-# link blackbox and Prometheus
-https://github.com/prometheus/blackbox_exporter
+### Prometheus Configuration for Blackbox Exporter
 
+```yaml
 - job_name: 'blackbox'
-    metrics_path: /probe
-    params:
-      module: [http_2xx]  # Look for a HTTP 200 response.
-    static_configs:
-      - targets:
-        - http://prometheus.io    # Target to probe with http.
-        - https://prometheus.io   # Target to probe with https.
-        - http://example.com:8080 # Target to probe with http on port 8080.
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: 127.0.0.1:9115
+  metrics_path: /probe
+  params:
+    module: [http_2xx]  # Expect HTTP 200 responses.
+  static_configs:
+    - targets:
+        - http://prometheus.io    # HTTP target.
+        - https://prometheus.io   # HTTPS target.
+        - http://example.com:8080 # HTTP target on port 8080.
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: 127.0.0.1:9115
+```
+
+---
+
