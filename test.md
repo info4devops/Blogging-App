@@ -69,6 +69,7 @@ cd prometheus
 =============================================
 
 # link blackbox and Prometheus
+https://github.com/prometheus/blackbox_exporter
 
 - job_name: 'blackbox'
     metrics_path: /probe
